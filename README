@@ -1,0 +1,7 @@
+Byzantine Generals Problem
+
+For n generals, t of whom are traitors, is there an algorithm such that an arbitrarily picked commanding general can send an order to lieutenant generals such that
+1.) All loyal generals obey the same order
+2.) If the commanding general is loyal, then every loyal lieutenant obeys the order he sends
+
+
