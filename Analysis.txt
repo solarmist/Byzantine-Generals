@@ -1,0 +1,12 @@
+1.) A solution has to guarantee that all correct processes eventually reach a decision regarding the value of the order they have been given.
+2.) All correct processes have to decide on the same value of the order they have been given.
+3.) If the source process is a correct process, all processes have to decide on the value that was original given by the source process.
+
+Cases:
+For n = 1, t = 0 or 1
+t = 0 there is always consensus, ignore from now on.
+Always the commanding general
+Always consensus either as a traitor or loyalist 
+
+For n = 2, t = 1 or 2
+W
