@@ -1,12 +1,15 @@
+n = nodes, m = traitors
+
+Algorithm OM(0)
+The general sends his value to every lieutenant.
+Each lieutenant uses the value he receives from the general.
+Algorithm OM(m), m > 0
+
+The general sends his value to each lieutenant.
+For each i, let vi be the value lieutenant i receives from the general. Lieutenant i acts as the general in Algorithm OM(m-1) to send the value vi to each of the n-2 other lieutenants.
+For each i, and each j ≠ i, let vi be the value lieutenant i received from lieutenant j in step 2 (using Algorithm (m-1)). Lieutenant i uses the value majority (v1, v2, … vn).
+
 1.) A solution has to guarantee that all correct processes eventually reach a decision regarding the value of the order they have been given.
 2.) All correct processes have to decide on the same value of the order they have been given.
 3.) If the source process is a correct process, all processes have to decide on the value that was original given by the source process.
 
-Cases:
-For n = 1, t = 0 or 1
-t = 0 there is always consensus, ignore from now on.
-Always the commanding general
-Always consensus either as a traitor or loyalist 
-
-For n = 2, t = 1 or 2
-W
