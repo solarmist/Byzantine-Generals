@@ -211,7 +211,9 @@ def main(argv=None):
 			if option in ("-s", "--set"):
 				n = value
 		
-		n = 13
+		n = 9
+		m = 4
+		GenTraitor = True
 			
 		#for i in range(n):
 		#    for j in range(i):
@@ -219,8 +221,8 @@ def main(argv=None):
 		#            print 'Byzantine Generals (General is a traitor) n = ' + str(i) + ' m = ' + str(j)
 		#            Byzantine(i,j, True)
 		#            print
-		print 'Byzantine Generals n = ' + str(13) + ' m = ' + str(3)
-		Byzantine(13,3, False)
+		print 'Byzantine Generals n = ' + str(n) + ' m = ' + str(m)
+		Byzantine(n,m, True)
 		print
 	
 	except Usage, err:
