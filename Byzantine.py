@@ -33,10 +33,12 @@ class node:
         self.output = output
 
 def h(i):
-    if i < 10:
+    #If it's less than 10 or already a string just return
+    #if i < 10 or type(i) != type(0):
+    if type(i) != type(0):
         return i
     else:
-        return hex(copy.copy(i))[-1:]
+        return str(hex(copy.copy(i))[-1:])
 
 class Process:
     '''A process class for the Byzantine Generals Problem'''
@@ -48,27 +50,31 @@ class Process:
     #number of traitors
     m = 2
     #traitors
-    traitor = list()
+    traitor = {}
     
     def __init__(self, p = 0):
         self.pid = p
         self.nodes = dict()
+        init = dict()
+        for i in range(Process.n):
+            init[h(i)] = [True]
         if len(Process.children) == 0:
-            self.generate_children(Process.m, Process.n, [True] * Process.n, Process.commander)
+            #self.generate_children(Process.m, Process.n, [True] * Process.n, Process.commander)
+            self.generate_children(Process.m, Process.n, init, Process.commander)
         if self.pid == Process.commander:
             self.value = random.randint(0,1)
-            self.nodes[""] = node(self.value,UNKNOWN)
+            self.nodes[''] = node(self.value,UNKNOWN)
     
     def is_commander(self):
         return Process.commander == self.pid
-        
+    
     @staticmethod
     def get_default():
         print 'uses the default action and',
         return 1
-        
+    
     def get_value(self, value, destination):
-        if Process.traitor[self.pid]:
+        if Process.traitor[h(self.pid)]:
             return random.randint(0,1)
         if self.pid == Process.commander:
             return self.value
@@ -76,47 +82,47 @@ class Process:
             return value
     
     def is_faulty(self):
-        return Process.traitor[self.pid]
-        
+        return Process.traitor[h(self.pid)]
+    
     def receive_message(self, path, node):
-        self.nodes[path] = node
-        
+        self.nodes[h(path)] = node
+    
     def send_messages(self, round, processes):
-        for i in range( len(Process.pathsByRank[round][self.pid]) ):
-            sourceNodePath = Process.pathsByRank[round][self.pid][i][:-1]
-            sourceNode = self.nodes[sourceNodePath]
+        for i in range( len(Process.pathsByRank[h(round)][h(self.pid)]) ):
+            sourceNodePath = Process.pathsByRank[h(round)][h(self.pid)][h(i)][:-1]
+            sourceNode = self.nodes[h(sourceNodePath)]
             for j in range(Process.n):
                 if j != Process.commander:
                     value = self.get_value(sourceNode.input, j)
                     
                     if verbose:
                         print 'Sending from process ' + str(self.pid) + ' to ' + str(j) + ':', 
-                        print '{' + str(value) + ', ' + Process.pathsByRank[round][self.pid][i] + ', ' + str(UNKNOWN) + '},', 
+                        print '{' + str(value) + ', ' + Process.pathsByRank[h(round)][h(self.pid)][h(i)] + ', ' + str(UNKNOWN) + '},', 
                         print 'getting value from sourceNode ' + sourceNodePath + ' value ' + str(value)
                         
-                    processes[j].receive_message(Process.pathsByRank[round][self.pid][i], node(value, UNKNOWN))
+                    processes[h(j)].receive_message(Process.pathsByRank[h(round)][h(self.pid)][h(i)], node(value, UNKNOWN))
     
     def decide(self):
         if self.pid == Process.commander:
-            return self.nodes[""].input
+            return self.nodes[''].input
             
         #Set the leave values
         for i in range(Process.n):
-            for j in range( len(Process.pathsByRank[Process.m][i]) ):
-                path = Process.pathsByRank[Process.m][i][j]
-                node = self.nodes[path]
+            for j in range( len(Process.pathsByRank[h(Process.m)][h(i)]) ):
+                path = Process.pathsByRank[h(Process.m)][h(i)][h(j)]
+                node = self.nodes[h(path)]
                 node.output = node.input
                 
         #Work up the tree
         for round in range(Process.m - 1, -1, -1):
             for i in range(Process.n):
-                for j in range( len(Process.pathsByRank[round][i]) ):
-                    path = Process.pathsByRank[round][i][j]
-                    node = self.nodes[path]
+                for j in range( len(Process.pathsByRank[h(round)][h(i)]) ):
+                    path = Process.pathsByRank[h(round)][h(i)][h(j)]
+                    node = self.nodes[h(path)]
                     node.output = self.get_majority(path)
                     
         topPath = Process.pathsByRank[0][Process.commander][0]
-        return self.nodes[topPath].output
+        return self.nodes[h(topPath)].output
     
     def get_majority(self, path):
         counts = {ONE:0, ZERO:0, UNKNOWN:0}
@@ -134,52 +140,63 @@ class Process:
         else:
             #print 'Cannot decide'
             return UNKNOWN
-        
+    
     def generate_children(self, m, n, ids, source, currentPath = '', rank = 0):
         '''Build the communitation tree'''
-        ids[source] = False
+        ids[h(source)] = False
         currentPath += str(h(source))
-        Process.pathsByRank[rank][source].append(currentPath)
+        counter_x = 0
+        Process.pathsByRank[h(rank)][h(source)][h(counter_x)] = currentPath
+        
         if rank < m:
             for i in range(len(ids)):
-                if ids[i]:
+                if ids[h(i)]:
                     self.generate_children(m, n, copy.copy(ids), i, currentPath, rank + 1)
-                    Process.children[currentPath].append(currentPath + str(h(i)) )
+                    Process.children[h(currentPath)][h(counter_x)] = currentPath + str(h(i))
+                    counter_x += 1
         if verbose:
             print currentPath + ", children =",
-            for i in Process.children[currentPath]:
+            for i in Process.children[h(currentPath)]:
                 print i,
             print
+    
 
 def Byzantine(n = 7, m = 2, commandTraitor = True):
     #Set up static class variables
 	Process.n = n
 	Process.m = m #Traitors
 	Process.commander = random.randint(0, Process.n -1)
-	Process.pathsByRank = defaultdict(lambda : defaultdict(list))
-	Process.children = defaultdict(list)
+	Process.pathsByRank = defaultdict(lambda : defaultdict(lambda : defaultdict()))
+	Process.children = defaultdict(lambda : defaultdict())
 	
-	Process.traitor = []
-	processes = []
+	Process.traitor = defaultdict()
+	processes = defaultdict()
 	
 	#Create the processes and mark the traitors
 	#PID > 9 need to be in hex.
 	for i in range(Process.n):
-	    Process.traitor.append(False)
-	    processes.append( Process( h(i)) )
+	    #Process.traitor.append(False)
+	    #processes.append(h(i), Process( h(i)) )
+	    Process.traitor[h(i)] = False
+	    processes[h(i)] = Process(h(i))
 	    
+	#Set the first traitor
+	count_m = 0
 	if commandTraitor:
 	    Process.traitor[Process.commander] = True
+	    count_m += 1
 	
-	while Process.traitor.count(True) < Process.m:
+	
+	while count_m < Process.m:
 	    Process.traitor[random.randint(0, Process.n - 1)] = True
+	    count_m += 1
 	    
 	if verbose:
 	    print Process.traitor
 	    
 	for i in range(Process.m + 1):
 	    for j in range( Process.n ):
-	        processes[j].send_messages(i, processes)
+	        processes[h(j)].send_messages(i, processes)
 	    
 	for j in range( len(processes) ):
 	    if processes[j].is_commander():
@@ -190,7 +207,6 @@ def Byzantine(n = 7, m = 2, commandTraitor = True):
 	    else:
 	        print 'decides on value ' + str(processes[j].decide())
 #Need a concensus value here? Did they converge?
-
 
 def main(argv=None):
 	if argv is None:
@@ -211,7 +227,7 @@ def main(argv=None):
 			if option in ("-s", "--set"):
 				n = value
 		
-		n = 9
+		n = 7
 		m = 4
 		GenTraitor = True
 			
@@ -229,7 +245,6 @@ def main(argv=None):
 		print >> sys.stderr, sys.argv[0].split("/")[-1] + ": " + str(err.msg)
 		print >> sys.stderr, "\t for help use --help"
 		return 2
-		
 
 	
 
